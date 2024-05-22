@@ -171,23 +171,23 @@
             <span class="aside-menu-title">{{ __('messages.vcard.appointments') }}</span>
         </a>
     </li>
-
+{{-- 
     <li class="nav-item {{ Request::is('admin/product-orders*') ? 'active' : '' }}">
         <a class="nav-link d-flex align-items-center py-3" aria-current="page" href="{{ route('product-orders.index') }}">
             <span class="aside-menu-icon pe-3"><i class="fas fa-money-bills"></i></span>
             <span class="aside-menu-title">{{ __('messages.product_orders') }}</span>
         </a>
-    </li>
+    </li> --}}
 
-    <!--<li class="nav-item {{ Request::is('admin/virtual-backgrounds*') ? 'active' : '' }}">-->
-    <!--    <a class="nav-link d-flex align-items-center py-3" aria-current="page"-->
-    <!--        href="{{ route('virtual-backgrounds.index') }}">-->
-    <!--        <span class="aside-menu-icon pe-3"><i class="fas fa-id-card-clip"></i></span>-->
-    <!--        <span class="aside-menu-title">{{ __('messages.virtual_backgrounds') }}</span>-->
-    <!--    </a>-->
-    <!--</li>-->
+    {{-- <li class="nav-item {{ Request::is('admin/virtual-backgrounds*') ? 'active' : '' }}">
+        <a class="nav-link d-flex align-items-center py-3" aria-current="page"
+            href="{{ route('virtual-backgrounds.index') }}">
+            <span class="aside-menu-icon pe-3"><i class="fas fa-id-card-clip"></i></span>
+            <span class="aside-menu-title">{{ __('messages.virtual_backgrounds') }}</span>
+        </a>
+    </li> --}}
 
-    @if (checkFeature('affiliation'))
+    {{-- @if (checkFeature('affiliation'))
         <li class="nav-item {{ Request::is('admin/affiliations*') ? 'active' : '' }}">
             <a class="nav-link d-flex align-items-center py-3" aria-current="page"
                 href="{{ route('user.affiliation.index') }}">
@@ -195,7 +195,7 @@
                 <span class="aside-menu-title">{{ __('messages.plan.affiliation') }}</span>
             </a>
         </li>
-    @endif
+    @endif --}}
 
         <li class="nav-item {{ Request::is('admin/my-nfc-cards*') ? 'active' : '' }}">
             <a class="nav-link d-flex align-items-center py-3" aria-current="page"
@@ -209,6 +209,12 @@
         <a class="nav-link d-flex align-items-center py-3" aria-current="page" href="{{ route('user.setting.index') }}">
             <span class="aside-menu-icon pe-3"><i class="fas fa-cog"></i></span>
             <span class="aside-menu-title">{{ __('messages.settings') }}</span>
+        </a>
+    </li>
+    <li class="nav-item {{ Request::is('admin/qr-view*') ? 'active' : '' }}">
+        <a class="nav-link d-flex align-items-center py-3" aria-current="page" href="{{ route('vcard.setting.index') }}">
+            <span class="aside-menu-icon pe-3"><i class="fas fa-cog"></i></span>
+            <span class="aside-menu-title">{{ __('All QR') }}</span>
         </a>
     </li>
 @endrole

@@ -92,7 +92,7 @@ class VcardController extends AppBaseController
     public function create()
     {
         $makeVcard = $this->vcardRepository->checkTotalVcard();
-        if (! $makeVcard) {
+        if (!$makeVcard) {
             return redirect(route('vcards.index'));
         }
 
@@ -120,10 +120,11 @@ class VcardController extends AppBaseController
      */
     public function show($alias, $id = null): \Illuminate\View\View
     {
+        // dd($alias);
         $vcard = Vcard::with([
             'businessHours' => function ($query) {
                 $query->where('end_time', '!=', '00:00');
-            }, 'services', 'testimonials', 'products', 'blogs', 'privacy_policy', 'term_condition', 'user','banners','iframes',
+            }, 'services', 'testimonials', 'products', 'blogs', 'privacy_policy', 'term_condition', 'user', 'banners', 'iframes',
         ])->whereUrlAlias($alias)->first();
 
         $vcardProducts = $vcard->products->sortDesc()->take(6);
@@ -151,14 +152,14 @@ class VcardController extends AppBaseController
             $paymentMethod = getPaymentMethod($userSetting);
         }
 
-        $reqpage = str_replace('/'.$vcard->url_alias, '', \Request::getRequestUri());
+        $reqpage = str_replace('/' . $vcard->url_alias, '', \Request::getRequestUri());
         $reqpage = empty($reqpage) ? 'index' : $reqpage;
         $reqpage = preg_replace("/\.$/", '', $reqpage);
         $reqpage = preg_replace('/[0-9]+/', '', $reqpage);
         $reqpage = str_replace('/', '', $reqpage);
         $reqpage = str_contains($reqpage, '?') ? substr($reqpage, 0, strpos($reqpage, '?')) : $reqpage;
 
-        $vcard_name = $vcard_name == 'vcard11' ? 'vcard11.'.$reqpage : $vcard_name;
+        $vcard_name = $vcard_name == 'vcard11' ? 'vcard11.' . $reqpage : $vcard_name;
 
         $businessDaysTime = [];
 
@@ -170,7 +171,7 @@ class VcardController extends AppBaseController
 
             foreach ($vcard->businessHours as $key => $openDay) {
                 $openDayKeys[] = $openDay->day_of_week;
-                $openDays[$openDay->day_of_week] = $openDay->start_time.' - '.$openDay->end_time;
+                $openDays[$openDay->day_of_week] = $openDay->start_time . ' - ' . $openDay->end_time;
             }
 
             $closedDayKeys = array_diff($dayKeys, $openDayKeys);
@@ -191,13 +192,13 @@ class VcardController extends AppBaseController
         $qrcodeColor['qrcodeColor'] = Hex::fromString($customQrCode['qrcode_color'])->toRgb();
         $qrcodeColor['background_color'] = Hex::fromString($customQrCode['background_color'])->toRgb();
 
-        if(empty(getLocalLanguage())){
+        if (empty(getLocalLanguage())) {
             $alias = $vcard->url_alias;
             $languageName = $vcard->default_language;
             session(['languageChange_' . $alias => $languageName]);
             setLocalLang(getLocalLanguage());
         }
-
+        // dd($vcard_name);
         if ($vcard->status) {
             return view(
                 'vcardTemplates.' . $vcard_name,
@@ -224,6 +225,36 @@ class VcardController extends AppBaseController
         abort('404');
     }
 
+    public function viewQr(Request $request, Vcard $vcard)
+    {
+        $qrCode = Vcard::select('url_alias')
+            ->where('tenant_id', getLogInTenantId())
+            ->get();
+
+        // Initialize the final array
+        $finalArray = [];
+
+        // Iterate through the $qrCode collection
+        foreach ($qrCode as $item) {
+            if ($item->url_alias) {
+                $vcard = Vcard::with(['user'])
+                    ->whereUrlAlias($item->url_alias)
+                    ->first();
+
+                // Add the $vcard data to the final array
+                $finalArray[] = $vcard->toArray();
+            }
+        }
+
+        // Return the final array
+        // dd($finalArray, $qrCode);
+
+
+
+        return view('vcardTemplates.viewQr',  ['vcardData' => $finalArray]);
+    }
+
+
     public function checkPassword(Request $request, Vcard $vcard): JsonResponse
     {
         setLocalLang(checkLanguageSession($vcard->url_alias));
@@ -245,7 +276,7 @@ class VcardController extends AppBaseController
         $partName = ($request->part === null) ? 'basics' : $request->part;
 
         if ($partName !== TermCondition::TERM_CONDITION && $partName !== PrivacyPolicy::PRIVACY_POLICY) {
-            if (! checkFeature($partName)) {
+            if (!checkFeature($partName)) {
                 return redirect(route('vcards.edit', $vcard->id));
             }
         }
@@ -260,13 +291,13 @@ class VcardController extends AppBaseController
         $instagramEmbed = AppointmentDetail::where('vcard_id', $vcard->id)->first();
         $iframes = Iframe::where('vcard_id', $vcard->id)->first();
 
-        return view('vcards.edit', compact('appointmentDetail', 'privacyPolicy', 'termCondition', 'iframes','managesection','instagramEmbed', 'banners'))->with($data);
+        return view('vcards.edit', compact('appointmentDetail', 'privacyPolicy', 'termCondition', 'iframes', 'managesection', 'instagramEmbed', 'banners'))->with($data);
     }
 
     public function updateStatus(Vcard $vcard): JsonResponse
     {
         $vcard->update([
-            'status' => ! $vcard->status,
+            'status' => !$vcard->status,
         ]);
 
         return $this->sendSuccess(__('messages.flash.vcard_status'));
@@ -279,7 +310,7 @@ class VcardController extends AppBaseController
         $vcard = $this->vcardRepository->update($input, $vcard);
 
         if ($vcard) {
-            Session::flash('success', ' '.__('messages.flash.vcard_update'));
+            Session::flash('success', ' ' . __('messages.flash.vcard_update'));
         }
 
         return redirect()->back();
@@ -289,13 +320,13 @@ class VcardController extends AppBaseController
     {
         $termCondition = TermCondition::whereVcardId($vcard->id)->first();
 
-        if (! empty($termCondition)) {
+        if (!empty($termCondition)) {
             $termCondition->delete();
         }
 
         $privacyPolicy = PrivacyPolicy::whereVcardId($vcard->id)->first();
 
-        if (! empty($privacyPolicy)) {
+        if (!empty($privacyPolicy)) {
             $privacyPolicy->delete();
         }
 
@@ -338,25 +369,25 @@ class VcardController extends AppBaseController
         foreach ($bookedAppointments as $appointment) {
             if ($appointment->date == $request->date) {
                 if (getUserSettingValue('time_format', $userId) == UserSetting::HOUR_24) {
-                    $bookedSlot[] = date('H:i', strtotime($appointment->from_time)).' - '.date(
+                    $bookedSlot[] = date('H:i', strtotime($appointment->from_time)) . ' - ' . date(
                         'H:i',
                         strtotime($appointment->to_time)
                     );
                 } else {
-                    $bookedSlot[] = date('h:i A', strtotime($appointment->from_time)).' - '
-                        .date('h:i A', strtotime($appointment->to_time));
+                    $bookedSlot[] = date('h:i A', strtotime($appointment->from_time)) . ' - '
+                        . date('h:i A', strtotime($appointment->to_time));
                 }
             }
         }
 
         foreach ($WeekDaySessions as $index => $WeekDaySession) {
             if (getUserSettingValue('time_format', $userId) == UserSetting::HOUR_24) {
-                $bookingSlot[] = date('H:i', strtotime($WeekDaySession->start_time)).' - '.date(
+                $bookingSlot[] = date('H:i', strtotime($WeekDaySession->start_time)) . ' - ' . date(
                     'H:i',
                     strtotime($WeekDaySession->end_time)
                 );
             } else {
-                $bookingSlot[] = date('h:i A', strtotime($WeekDaySession->start_time)).' - '.date(
+                $bookingSlot[] = date('h:i A', strtotime($WeekDaySession->start_time)) . ' - ' . date(
                     'h:i A',
                     strtotime($WeekDaySession->end_time)
                 );
@@ -374,7 +405,7 @@ class VcardController extends AppBaseController
 
     public function language($languageName, $alias)
     {
-        session(['languageChange_'.$alias => $languageName]);
+        session(['languageChange_' . $alias => $languageName]);
         setLocalLang(getLocalLanguage());
 
         return $this->sendSuccess(__('messages.flash.language_update'));
@@ -491,23 +522,23 @@ class VcardController extends AppBaseController
         $vcfVcard->addCompany($vcard->company);
         $vcfVcard->addJobtitle($vcard->job_title);
 
-        if (! empty($vcard->email)) {
+        if (!empty($vcard->email)) {
             $vcfVcard->addEmail($vcard->email);
         }
 
-        if (! empty($vcard->alternative_email)) {
+        if (!empty($vcard->alternative_email)) {
             $vcfVcard->addEmail($vcard->alternative_email, 'EMAIL;type=Alternate Email');
         }
 
-        if (! empty($vcard->phone)) {
-            $vcfVcard->addPhoneNumber('+'.$vcard->region_code.$vcard->phone, 'TEL;type=CELL');
+        if (!empty($vcard->phone)) {
+            $vcfVcard->addPhoneNumber('+' . $vcard->region_code . $vcard->phone, 'TEL;type=CELL');
         }
-        if (! empty($vcard->alternative_phone)) {
-            $vcfVcard->addPhoneNumber('+'.$vcard->alternative_region_code.$vcard->alternative_phone, 'TEL;type=Alternate Phone');
+        if (!empty($vcard->alternative_phone)) {
+            $vcfVcard->addPhoneNumber('+' . $vcard->alternative_region_code . $vcard->alternative_phone, 'TEL;type=Alternate Phone');
         }
 
         $vcfVcard->addAddress($vcard->location);
-        if (! empty($vcard->location_url)) {
+        if (!empty($vcard->location_url)) {
             $vcfVcard->addURL($vcard->location_url, 'TYPE=Location URL');
         }
 
@@ -526,7 +557,7 @@ class VcardController extends AppBaseController
 
         foreach ($socialLinks as $key => $link) {
             $name = Str::camel($key);
-            $vcfVcard->addURL($link, 'TYPE='.$name);
+            $vcfVcard->addURL($link, 'TYPE=' . $name);
         }
 
         $vcfVcard->addURL(URL::to($vcard->url_alias));
@@ -542,7 +573,8 @@ class VcardController extends AppBaseController
         );
     }
 
-    public function showProducts($id,$alias){
+    public function showProducts($id, $alias)
+    {
 
         $vcard = Vcard::with([
             'businessHours' => function ($query) {
@@ -557,7 +589,7 @@ class VcardController extends AppBaseController
 
         if ($vcard->status) {
             return view(
-                'vcardTemplates/products/vcard'.$template_id,
+                'vcardTemplates/products/vcard' . $template_id,
                 compact(
                     'vcard',
                     'vcardProducts',
@@ -567,10 +599,10 @@ class VcardController extends AppBaseController
         }
     }
 
-    public function deleteAccount(){
+    public function deleteAccount()
+    {
 
         return view('vcards.delete_account');
-
     }
 
     public function getCookie(Request $request)
@@ -579,7 +611,7 @@ class VcardController extends AppBaseController
         $urlWithoutDomain = trim(parse_url($fullUrl, PHP_URL_PATH), '/');
 
         $vcard = Vcard::whereUrlAlias($urlWithoutDomain)->first();
-        $valuedata = 5 * 1000; 
+        $valuedata = 5 * 1000;
 
         if ($vcard) {
             $user = $vcard->user;

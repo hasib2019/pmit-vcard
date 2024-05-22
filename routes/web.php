@@ -334,6 +334,8 @@ Route::middleware('auth', 'valid.user')->group(function () {
                 Route::get('/user-settings', [UserSettingController::class, 'index'])->name('user.setting.index');
                 Route::get('/payment-method', [UserSettingController::class, 'index'])->name('user.payment.method');
                 Route::post('/user-setting', [UserSettingController::class, 'update'])->name('user.setting.update');
+                // vartualCard qr 
+                Route::get('/qr-view', [VcardController::class, 'viewQr'])->name('vcard.setting.index');
 
                 Route::get('virtual-backgrounds', [ECardsController::class, 'index'])->name('virtual-backgrounds.index');
                 Route::get('virtual-backgrounds/{ecard}/create', [ECardsController::class, 'create'])->name('virtual-backgrounds.create');
