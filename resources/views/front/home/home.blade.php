@@ -239,13 +239,13 @@
                                         <a class="faq-find" data-toggle="collapse" data-parent="faq-collapse"
                                             href="#collapse1">
                                             <span> <i class="far fa-plus-square"></i></span>What is
-                                            Digital Identity: Your Virtual Networking Hub?
+                                            Digital Identity And Virtual Networking Hub?
                                         </a>
                                     </h3>
                                 </div>
                                 <div id="collapse1" class="panel-collapse collapse in">
                                     <p class="panel-body">
-                                        Digital Identity: Your Virtual Networking Hub is a
+                                        Digital Identity And Virtual Networking Hub is a
                                         revolutionary platform that allows users to manage their
                                         digital identities securely and conveniently. It offers a
                                         centralized solution for storing, accessing, and
